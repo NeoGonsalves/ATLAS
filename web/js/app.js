@@ -351,6 +351,11 @@ function renderScanRows(tbody, scans) {
 
 async function loadDashboard() {
     const tbody = document.getElementById('scans-table-body');
+    const lastUpdatedEl = document.getElementById('dashboard-last-updated');
+
+    if (lastUpdatedEl) {
+        lastUpdatedEl.textContent = 'Updating...';
+    }
 
     // Show skeleton loading
     tbody.innerHTML = Array(4).fill('').map(() => `
@@ -380,6 +385,9 @@ async function loadDashboard() {
 
         const { scans } = await apiRequest('/scans?limit=10');
         allScans = scans;
+        if (lastUpdatedEl) {
+            lastUpdatedEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
 
         if (scans.length === 0) {
             tbody.innerHTML = `
@@ -401,6 +409,9 @@ async function loadDashboard() {
 
     } catch (error) {
         console.error('Failed to load dashboard:', error);
+        if (lastUpdatedEl) {
+            lastUpdatedEl.textContent = 'Unavailable';
+        }
     }
 }
 
@@ -978,13 +989,8 @@ async function deleteReport(scanId) {
 async function loadAllChecks() {
     try {
         const data = await apiRequest('/checks/categories');
-
+        const { checks = [] } = await apiRequest('/checks');
         const summary = document.getElementById('checks-summary');
-        summary.innerHTML = `
-            <p>Total: <strong>${data.total}</strong> vulnerability checks available</p>
-        `;
-
-        const { checks } = await apiRequest('/checks');
 
         // Group by category
         const byCategory = {};
@@ -992,23 +998,106 @@ async function loadAllChecks() {
             if (!byCategory[check.category]) byCategory[check.category] = [];
             byCategory[check.category].push(check);
         });
+        const categories = Object.entries(byCategory).sort((a, b) => a[0].localeCompare(b[0]));
+        const totalFromApi = Number(data.total);
+        const totalChecks = Number.isFinite(totalFromApi) ? totalFromApi : checks.length;
+        const severityOrder = ['critical', 'high', 'medium', 'low', 'info'];
+
+        if (summary) {
+            summary.innerHTML = `
+                <p><strong>${totalChecks}</strong> checks across <strong>${categories.length}</strong> categories.</p>
+            `;
+        }
 
         const container = document.getElementById('all-checks-list');
-        container.innerHTML = Object.entries(byCategory).map(([cat, catChecks]) => `
-            <div class="check-category">
-                <div class="category-header">${cat} (${catChecks.length})</div>
-                ${catChecks.map(c => `
-                    <div class="check-item" style="cursor: default;">
+        if (!container) return;
+
+        container.innerHTML = categories.map(([cat, catChecks]) => `
+            <article class="check-category checks-simple-category">
+                <div class="checks-simple-category-header">
+                    <div class="category-header">${escapeHtml(cat)}</div>
+                    <span class="checks-count-chip">${catChecks.length}</span>
+                </div>
+                <div class="checks-simple-list">
+                ${catChecks.map(c => {
+                    const rawSeverity = String(c.severity || 'info').toLowerCase();
+                    const sev = severityOrder.includes(rawSeverity) ? rawSeverity : 'info';
+                    const searchable = [
+                        c.name,
+                        c.description,
+                        c.owasp_category,
+                        c.category,
+                        sev
+                    ].filter(Boolean).join(' ').toLowerCase();
+                    return `
+                    <div class="check-item checks-simple-item" data-search="${escapeHtml(searchable)}">
                         <div class="check-info">
-                            <div class="check-name">${c.name}</div>
-                            <div class="check-description">${c.description}</div>
-                            ${c.owasp_category ? `<small style="color: var(--text-muted);">${c.owasp_category}</small>` : ''}
+                            <div class="check-name">${escapeHtml(c.name || 'Unnamed check')}</div>
+                            <div class="check-description">${escapeHtml(c.description || 'No description provided.')}</div>
+                            ${c.owasp_category ? `<small>${escapeHtml(c.owasp_category)}</small>` : ''}
                         </div>
-                        <span class="severity-badge severity-${c.severity}">${c.severity}</span>
+                        <span class="severity-badge severity-${sev}">${sev.toUpperCase()}</span>
                     </div>
-                `).join('')}
-            </div>
+                    `;
+                }).join('')}
+                </div>
+            </article>
         `).join('');
+        container.insertAdjacentHTML('beforeend', `
+            <div class="checks-empty-state hidden" id="checks-empty-state">
+                No checks match your current search.
+            </div>
+        `);
+
+        const filterInput = document.getElementById('checks-filter-input');
+        const filterCount = document.getElementById('checks-filter-count');
+        const emptyState = document.getElementById('checks-empty-state');
+
+        const applyChecksFilter = () => {
+            const query = (filterInput?.value || '').trim().toLowerCase();
+            let visibleChecks = 0;
+            let visibleCategories = 0;
+
+            container.querySelectorAll('.checks-simple-category').forEach(card => {
+                let cardVisibleChecks = 0;
+
+                card.querySelectorAll('.checks-simple-item').forEach(item => {
+                    const searchable = item.dataset.search || '';
+                    const isVisible = !query || searchable.includes(query);
+                    item.classList.toggle('is-hidden', !isVisible);
+                    if (isVisible) {
+                        visibleChecks += 1;
+                        cardVisibleChecks += 1;
+                    }
+                });
+
+                const hasVisibleItems = cardVisibleChecks > 0;
+                card.classList.toggle('is-empty', !hasVisibleItems);
+                if (hasVisibleItems) {
+                    visibleCategories += 1;
+                }
+            });
+
+            if (filterCount) {
+                if (query) {
+                    const checkLabel = visibleChecks === 1 ? 'check' : 'checks';
+                    const categoryLabel = visibleCategories === 1 ? 'category' : 'categories';
+                    filterCount.textContent = `Showing ${visibleChecks} ${checkLabel} in ${visibleCategories} ${categoryLabel}`;
+                } else {
+                    filterCount.textContent = `Showing all ${checks.length} checks`;
+                }
+            }
+
+            if (emptyState) {
+                emptyState.classList.toggle('hidden', visibleChecks > 0);
+            }
+        };
+
+        if (filterInput) {
+            filterInput.value = '';
+            filterInput.oninput = applyChecksFilter;
+        }
+        applyChecksFilter();
 
     } catch (error) {
         console.error('Failed to load checks:', error);
@@ -1683,6 +1772,17 @@ async function cancelScan(scanId) {
 
 async function loadActivityFeed() {
     const container = document.getElementById('activity-feed');
+    const refreshBtn = document.getElementById('activity-refresh-btn');
+    const spinStart = Date.now();
+
+    if (refreshBtn) {
+        if (loadActivityFeed.resetTimer) {
+            clearTimeout(loadActivityFeed.resetTimer);
+        }
+        refreshBtn.classList.add('is-refreshing');
+        refreshBtn.disabled = true;
+    }
+
     // Skeleton loading
     container.innerHTML = Array(5).fill('').map(() => `
         <div class="activity-item">
@@ -1729,6 +1829,15 @@ async function loadActivityFeed() {
     } catch (error) {
         container.innerHTML = '<p class="empty-state">Failed to load activity feed.</p>';
         console.error('Activity feed error:', error);
+    } finally {
+        if (refreshBtn) {
+            const elapsed = Date.now() - spinStart;
+            const remaining = Math.max(0, 450 - elapsed);
+            loadActivityFeed.resetTimer = setTimeout(() => {
+                refreshBtn.classList.remove('is-refreshing');
+                refreshBtn.disabled = false;
+            }, remaining);
+        }
     }
 }
 

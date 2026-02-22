@@ -423,34 +423,59 @@
             </header>
             <!-- Dashboard Page -->
             <section id="page-dashboard" class="page active">
-                <header class="page-header">
-                    <h2>Dashboard</h2>
-                    <button class="btn btn-primary" data-role="pentester,admin" onclick="showPage('new-scan')">
-                        + New Scan
-                    </button>
+                <header class="page-header dashboard-header">
+                    <div class="dashboard-header-copy">
+                        <h2>Dashboard</h2>
+                        <p class="dashboard-subtitle">Monitor scans, findings, and system activity in one place.</p>
+                    </div>
+                    <div class="dashboard-header-actions">
+                        <button class="btn btn-secondary" onclick="loadDashboard()">↻ Refresh</button>
+                        <button class="btn btn-primary" data-role="pentester,admin" onclick="showPage('new-scan')">
+                            + New Scan
+                        </button>
+                    </div>
                 </header>
+
+                <div class="dashboard-hero">
+                    <div class="dashboard-hero-main">
+                        <span class="dashboard-pill">Security Overview</span>
+                        <h3>Operational Snapshot</h3>
+                        <p>Track severity trends and jump to scans, activity, and reports quickly.</p>
+                    </div>
+                    <div class="dashboard-hero-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="showPage('activity')">View Activity</button>
+                        <button class="btn btn-secondary btn-sm" onclick="showPage('reports')">Open Reports</button>
+                    </div>
+                    <div class="dashboard-last-sync">
+                        Last sync: <strong id="dashboard-last-updated">--</strong>
+                    </div>
+                </div>
 
                 <div class="dashboard-top">
                     <div class="stats-grid">
                         <div class="stat-card">
+                            <div class="stat-kicker">Scans</div>
                             <div class="stat-value" id="stat-total-scans">0</div>
                             <div class="stat-label">Total Scans</div>
                         </div>
                         <div class="stat-card stat-critical">
+                            <div class="stat-kicker">Risk</div>
                             <div class="stat-value" id="stat-critical">0</div>
                             <div class="stat-label">Critical</div>
                         </div>
                         <div class="stat-card stat-high">
+                            <div class="stat-kicker">Risk</div>
                             <div class="stat-value" id="stat-high">0</div>
                             <div class="stat-label">High</div>
                         </div>
                         <div class="stat-card stat-medium">
+                            <div class="stat-kicker">Risk</div>
                             <div class="stat-value" id="stat-medium">0</div>
                             <div class="stat-label">Medium</div>
                         </div>
                     </div>
                     <div class="severity-chart-card" id="severity-chart">
-                        <h4>Findings</h4>
+                        <h4>Severity Mix</h4>
                         <div class="donut-chart" id="donut-chart">
                             <div class="donut-center">
                                 <span class="donut-total" id="donut-total">0</span>
@@ -461,37 +486,67 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <h3>Recent Scans</h3>
-                    <div class="scan-search-bar">
-                        <div class="search-wrapper">
-                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <circle cx="11" cy="11" r="8" />
-                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                            </svg>
-                            <input type="text" class="search-input" id="scan-search"
-                                placeholder="Search by target, ID, or status..." oninput="filterScans()">
+                <div class="dashboard-content-grid">
+                    <div class="card dashboard-table-card">
+                        <div class="dashboard-table-head">
+                            <div>
+                                <h3>Recent Scans</h3>
+                                <p>Latest 10 assessments</p>
+                            </div>
+                        </div>
+                        <div class="scan-search-bar">
+                            <div class="search-wrapper">
+                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="11" cy="11" r="8" />
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                </svg>
+                                <input type="text" class="search-input" id="scan-search"
+                                    placeholder="Search by target, ID, or status..." oninput="filterScans()">
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Target</th>
+                                        <th>Status</th>
+                                        <th>Phase</th>
+                                        <th>Created</th>
+                                        <th style="min-width:150px">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scans-table-body">
+                                    <tr>
+                                        <td colspan="6" class="empty-state">No scans yet. Start your first scan!</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Target</th>
-                                    <th>Status</th>
-                                    <th>Phase</th>
-                                    <th>Created</th>
-                                    <th style="min-width:150px">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="scans-table-body">
-                                <tr>
-                                    <td colspan="6" class="empty-state">No scans yet. Start your first scan!</td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+                    <div class="dashboard-side-stack">
+                        <div class="card dashboard-side-card">
+                            <h3>Quick Actions</h3>
+                            <div class="dashboard-action-list">
+                                <button class="btn btn-secondary" data-role="pentester,admin"
+                                    onclick="showPage('new-scan')">Start New Scan</button>
+                                <button class="btn btn-secondary" onclick="showPage('activity')">Review Activity</button>
+                                <button class="btn btn-secondary" onclick="showPage('reports')">Open Reports</button>
+                                <button class="btn btn-secondary" onclick="showPage('scheduling')">Manage Schedule</button>
+                            </div>
+                        </div>
+
+                        <div class="card dashboard-side-card">
+                            <h3>Severity Guide</h3>
+                            <div class="dashboard-severity-guide">
+                                <div><span class="guide-dot critical"></span>Critical: Immediate remediation needed.</div>
+                                <div><span class="guide-dot high"></span>High: Prioritize in current cycle.</div>
+                                <div><span class="guide-dot medium"></span>Medium: Plan fix and monitor.</div>
+                                <div><span class="guide-dot low"></span>Low: Track in backlog.</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -670,12 +725,18 @@
             </section>
 
             <!-- Checks Page -->
-            <section id="page-checks" class="page">
+            <section id="page-checks" class="page checks-page">
                 <header class="page-header">
                     <h2>Available Vulnerability Checks</h2>
                 </header>
 
-                <div class="card">
+                <div class="card checks-library-card">
+                    <div class="checks-controls">
+                        <input type="search" id="checks-filter-input" class="form-input checks-filter-input"
+                            placeholder="Search checks, category, or OWASP mapping...">
+                        <small id="checks-filter-count" class="checks-filter-count">Showing all checks</small>
+                    </div>
+
                     <div class="checks-summary" id="checks-summary"></div>
                     <div class="all-checks-list" id="all-checks-list"></div>
                 </div>
@@ -837,7 +898,10 @@
             <section id="page-activity" class="page">
                 <header class="page-header">
                     <h2>Activity Log</h2>
-                    <button class="btn btn-secondary" onclick="loadActivityFeed()">↻ Refresh</button>
+                    <button id="activity-refresh-btn" class="btn btn-secondary activity-refresh-btn" onclick="loadActivityFeed()">
+                        <span class="refresh-icon" aria-hidden="true">↻</span>
+                        <span>Refresh</span>
+                    </button>
                 </header>
 
                 <div class="card">
