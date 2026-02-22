@@ -125,15 +125,6 @@ async def signup_page():
     return HTMLResponse(content="<h1>Signup page not found</h1>", status_code=404)
 
 
-@app.get("/about", response_class=HTMLResponse)
-async def about_page():
-    """Serve About Team page"""
-    about_path = web_dir / "about_team.html"
-    if about_path.exists():
-        return HTMLResponse(content=about_path.read_text(encoding='utf-8'))
-    return HTMLResponse(content="<h1>About page not found</h1>", status_code=404)
-
-
 @app.get("/loading", response_class=HTMLResponse)
 async def loading_page():
     """Serve loading screen"""

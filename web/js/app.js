@@ -5,6 +5,7 @@
 
 // API Configuration
 const API_BASE = '/api';
+const UI_THEME_KEY = 'atlas_ui_theme';
 
 // State
 let currentScanId = sessionStorage.getItem('atlas_scan_id') || null;
@@ -16,6 +17,8 @@ let allScans = [];
 // ========== Initialization ==========
 
 document.addEventListener('DOMContentLoaded', async () => {
+    initTheme();
+
     // Check authentication first
     const isAuthenticated = await checkAuthentication();
 
@@ -37,6 +40,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
+
+function initTheme() {
+    const savedTheme = localStorage.getItem(UI_THEME_KEY);
+    applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+}
+
+function applyTheme(theme) {
+    const isDark = theme === 'dark';
+
+    if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+
+    localStorage.setItem(UI_THEME_KEY, isDark ? 'dark' : 'light');
+
+    const toggleBtn = document.getElementById('theme-toggle-btn');
+    const toggleLabel = document.getElementById('theme-toggle-label');
+    if (toggleBtn) {
+        toggleBtn.classList.toggle('active', isDark);
+        toggleBtn.setAttribute('aria-pressed', String(isDark));
+        toggleBtn.title = isDark ? 'Switch to Light UI' : 'Switch to Black UI';
+    }
+    if (toggleLabel) {
+        toggleLabel.textContent = isDark ? 'Light UI' : 'Black UI';
+    }
+}
+
+function toggleTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    applyTheme(isDark ? 'light' : 'dark');
+}
 
 function initNavigation() {
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -1108,7 +1144,7 @@ function renderSimStepList() {
                 <div class="sim-step-item-cat">${step.owasp_category}</div>
             </div>
             <div class="sim-step-item-status">
-                ${simCompletedSteps.has(idx) ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00ff88" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                ${simCompletedSteps.has(idx) ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#107c10" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
             </div>
         </div>
     `).join('');
@@ -1821,7 +1857,7 @@ async function saveProfileChanges() {
             loadProfile();
         }
 
-        msgEl.innerHTML = '<span style="color: #00ff88;">✓ Profile updated successfully!</span>';
+        msgEl.innerHTML = '<span style="color: #107c10;">✓ Profile updated successfully!</span>';
         setTimeout(() => { msgEl.innerHTML = ''; }, 3000);
 
     } catch (error) {
@@ -1852,7 +1888,7 @@ async function changeUserPassword() {
 
         document.getElementById('current-password').value = '';
         document.getElementById('new-password').value = '';
-        msgEl.innerHTML = '<span style="color: #00ff88;">✓ Password changed successfully!</span>';
+        msgEl.innerHTML = '<span style="color: #107c10;">✓ Password changed successfully!</span>';
         setTimeout(() => { msgEl.innerHTML = ''; }, 3000);
 
     } catch (error) {
@@ -1898,35 +1934,63 @@ const WebTerminal = {
         container.innerHTML = '';
 
         // Create xterm.js instance
+        const isDarkUI = document.documentElement.getAttribute('data-theme') === 'dark';
+        const termTheme = isDarkUI
+            ? {
+                background: '#000000',
+                foreground: '#d4d4d4',
+                cursor: '#f5f5f5',
+                cursorAccent: '#000000',
+                selectionBackground: 'rgba(255, 255, 255, 0.2)',
+                selectionForeground: '#ffffff',
+                black: '#1a1a1a',
+                red: '#d32f2f',
+                green: '#107c10',
+                yellow: '#bdbdbd',
+                blue: '#9e9e9e',
+                magenta: '#b0b0b0',
+                cyan: '#9e9e9e',
+                white: '#f5f5f5',
+                brightBlack: '#666666',
+                brightRed: '#ef5350',
+                brightGreen: '#2aa846',
+                brightYellow: '#e0e0e0',
+                brightBlue: '#f5f5f5',
+                brightMagenta: '#f5f5f5',
+                brightCyan: '#f5f5f5',
+                brightWhite: '#ffffff',
+            }
+            : {
+                background: '#ffffff',
+                foreground: '#1f1f1f',
+                cursor: '#000000',
+                cursorAccent: '#ffffff',
+                selectionBackground: 'rgba(0, 0, 0, 0.2)',
+                selectionForeground: '#000000',
+                black: '#1f1f1f',
+                red: '#d32f2f',
+                green: '#107c10',
+                yellow: '#555555',
+                blue: '#333333',
+                magenta: '#4d4d4d',
+                cyan: '#2b2b2b',
+                white: '#f5f5f5',
+                brightBlack: '#666666',
+                brightRed: '#ef5350',
+                brightGreen: '#2aa846',
+                brightYellow: '#777777',
+                brightBlue: '#000000',
+                brightMagenta: '#000000',
+                brightCyan: '#000000',
+                brightWhite: '#ffffff',
+            };
+
         this.term = new Terminal({
             cursorBlink: true,
             cursorStyle: 'bar',
             fontSize: 14,
             fontFamily: '"Fira Code", "Cascadia Code", "JetBrains Mono", monospace',
-            theme: {
-                background: '#000000',
-                foreground: '#a0aec0',
-                cursor: '#00ff88',
-                cursorAccent: '#000000',
-                selectionBackground: 'rgba(0, 255, 136, 0.2)',
-                selectionForeground: '#ffffff',
-                black: '#0a0e1a',
-                red: '#ff4757',
-                green: '#00ff88',
-                yellow: '#ffd43b',
-                blue: '#00d4ff',
-                magenta: '#b794f6',
-                cyan: '#00d4ff',
-                white: '#e2e8f0',
-                brightBlack: '#4a5568',
-                brightRed: '#ff6b81',
-                brightGreen: '#2ed573',
-                brightYellow: '#fffa65',
-                brightBlue: '#70a1ff',
-                brightMagenta: '#d6a4ff',
-                brightCyan: '#7bed9f',
-                brightWhite: '#ffffff',
-            },
+            theme: termTheme,
             allowProposedApi: true,
             scrollback: 5000,
             convertEol: true,
@@ -2048,7 +2112,7 @@ const WebTerminal = {
         if (el) {
             el.textContent = text;
             // Update the indicator dot color
-            el.style.setProperty('--status-color', color === 'green' ? '#00ff88' : color === 'yellow' ? '#ffd43b' : '#ff4757');
+            el.style.setProperty('--status-color', color === 'green' ? '#107c10' : color === 'yellow' ? '#4d4d4d' : '#d32f2f');
         }
     },
 

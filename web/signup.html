@@ -19,7 +19,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: #0a0e1a;
+            background: #ffffff;
+            color: #000000;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -67,8 +68,8 @@
         }
 
         .login-card {
-            background: linear-gradient(145deg, #0f1419, #050810);
-            border: 1px solid #1e293b;
+            background: linear-gradient(145deg, #FFFFFF, #F0F0F0);
+            border: 1px solid #000000;
             border-radius: 20px;
             padding: 36px;
             position: relative;
@@ -78,11 +79,11 @@
 
         @keyframes cardGlow {
             from {
-                box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
             }
 
             to {
-                box-shadow: 0 0 50px rgba(0, 255, 136, 0.2), 0 0 80px rgba(0, 212, 255, 0.1);
+                box-shadow: 0 0 50px rgba(0, 0, 0, 0.2), 0 0 80px rgba(43, 43, 43, 0.1);
             }
         }
 
@@ -93,7 +94,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            background: linear-gradient(135deg, #000000, #2B2B2B);
             animation: borderPulse 2s ease-in-out infinite;
         }
 
@@ -124,7 +125,7 @@
             position: absolute;
             width: 4px;
             height: 4px;
-            background: #00ff88;
+            background: #000000;
             border-radius: 50%;
             animation: float 8s infinite;
             opacity: 0;
@@ -209,7 +210,7 @@
             font-family: 'Orbitron', monospace;
             font-size: 2.2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            background: linear-gradient(135deg, #000000, #2B2B2B);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -228,11 +229,11 @@
             }
 
             91% {
-                text-shadow: -2px 0 #00ff88, 2px 0 #00d4ff;
+                text-shadow: -2px 0 #000000, 2px 0 #2B2B2B;
             }
 
             92% {
-                text-shadow: 2px 0 #00ff88, -2px 0 #00d4ff;
+                text-shadow: 2px 0 #000000, -2px 0 #2B2B2B;
             }
 
             93% {
@@ -240,7 +241,7 @@
             }
 
             94% {
-                text-shadow: -1px 0 #ff4757, 1px 0 #00d4ff;
+                text-shadow: -1px 0 #ff4757, 1px 0 #2B2B2B;
             }
 
             95% {
@@ -249,7 +250,7 @@
         }
 
         .login-subtitle {
-            color: #94a3b8;
+            color: #333333;
             font-family: 'Fira Code', monospace;
             font-size: 0.85rem;
             overflow: hidden;
@@ -281,9 +282,9 @@
         }
 
         .signup-success {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            color: #00ff88;
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            color: #000000;
         }
 
         .login-error:not(:empty),
@@ -297,7 +298,7 @@
 
         .input-group label {
             display: block;
-            color: #e2e8f0;
+            color: #000000;
             font-weight: 500;
             margin-bottom: 6px;
             font-size: 0.85rem;
@@ -314,17 +315,17 @@
             transform: translateY(-50%);
             width: 18px;
             height: 18px;
-            color: #64748b;
+            color: #555555;
         }
 
         .login-input,
         .select-input {
             width: 100%;
             padding: 12px 14px 12px 44px;
-            background: rgba(0, 255, 136, 0.03);
-            border: 1px solid #1e293b;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid #000000;
             border-radius: 10px;
-            color: #e2e8f0;
+            color: #000000;
             font-size: 0.95rem;
             transition: all 0.3s;
         }
@@ -337,8 +338,8 @@
         .login-input:focus,
         .select-input:focus {
             outline: none;
-            border-color: #00ff88;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            border-color: #000000;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
         }
 
         .password-toggle {
@@ -348,27 +349,27 @@
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #64748b;
+            color: #555555;
             cursor: pointer;
         }
 
         .input-hint {
             display: block;
-            color: #64748b;
+            color: #555555;
             font-size: 0.8rem;
             margin-top: 6px;
         }
 
         .password-strength {
             height: 4px;
-            background: #1e293b;
+            background: #000000;
             border-radius: 2px;
             margin-top: 8px;
             overflow: hidden;
         }
 
         .password-match.valid {
-            color: #00ff88;
+            color: #000000;
         }
 
         .password-match.invalid {
@@ -380,18 +381,18 @@
             max-height: 150px;
             overflow-y: auto;
             background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #1e293b;
+            border: 1px solid #000000;
             border-radius: 10px;
             padding: 16px;
             font-family: 'Fira Code', monospace;
             font-size: 0.75rem;
-            color: #94a3b8;
+            color: #333333;
             line-height: 1.6;
         }
 
         .terms-content h4,
         .terms-content h5 {
-            color: #00ff88;
+            color: #000000;
             margin-top: 12px;
         }
 
@@ -407,12 +408,12 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #94a3b8;
+            color: #333333;
             cursor: pointer;
         }
 
         .terms-checkbox input[type="checkbox"] {
-            accent-color: #00ff88;
+            accent-color: #000000;
             width: 16px;
             height: 16px;
         }
@@ -424,10 +425,10 @@
         .login-btn {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            background: linear-gradient(135deg, #000000, #2B2B2B);
             border: none;
             border-radius: 10px;
-            color: #0a0e1a;
+            color: #000000;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -437,7 +438,7 @@
 
         .login-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
 
         .login-btn:disabled {
@@ -449,7 +450,7 @@
             display: flex;
             align-items: center;
             margin: 20px 0;
-            color: #64748b;
+            color: #555555;
         }
 
         .divider::before,
@@ -457,7 +458,7 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: #1e293b;
+            background: #000000;
         }
 
         .divider span {
@@ -470,10 +471,10 @@
         .github-btn {
             width: 100%;
             padding: 12px;
-            background: rgba(0, 255, 136, 0.05);
-            border: 1px solid #1e293b;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid #000000;
             border-radius: 10px;
-            color: #e2e8f0;
+            color: #000000;
             font-size: 0.9rem;
             cursor: pointer;
             display: flex;
@@ -487,20 +488,20 @@
         .google-btn:hover,
         .microsoft-btn:hover,
         .github-btn:hover {
-            border-color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
+            border-color: #000000;
+            background: rgba(0, 0, 0, 0.1);
         }
 
         .login-footer {
             text-align: center;
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 1px solid #1e293b;
-            color: #94a3b8;
+            border-top: 1px solid #000000;
+            color: #333333;
         }
 
         .login-footer a {
-            color: #00ff88;
+            color: #000000;
             text-decoration: none;
         }
 
@@ -742,14 +743,14 @@
 
                     // Cyan-green tint for signup
                     if (Math.random() > 0.5) {
-                        ctx.fillStyle = '#00d4ff';
+                        ctx.fillStyle = '#2B2B2B';
                     } else {
-                        ctx.fillStyle = 'rgba(0, 212, 255, 0.3)';
+                        ctx.fillStyle = 'rgba(43, 43, 43, 0.3)';
                     }
 
                     // Occasional green highlight
                     if (Math.random() > 0.96) {
-                        ctx.fillStyle = '#00ff88';
+                        ctx.fillStyle = '#000000';
                     }
 
                     ctx.fillText(char, i * fontSize, y);
