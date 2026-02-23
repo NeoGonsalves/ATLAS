@@ -2011,6 +2011,7 @@ const WebTerminal = {
     fitAddon: null,
     ws: null,
     initialized: false,
+    inputBuffer: '',
     _sessionTimer: null,
     _reconnectAttempts: 0,
     _maxReconnectAttempts: 5,
@@ -2119,12 +2120,8 @@ const WebTerminal = {
         // Fit to container
         setTimeout(() => this.fit(), 50);
 
-        // Handle user input — send to WebSocket
-        this.term.onData((data) => {
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send(data);
-            }
-        });
+        // Handle user input in restricted command mode.
+        this.term.onData((data) => this.handleInputData(data));
 
         // Handle resize
         this.term.onResize(({ cols, rows }) => {
@@ -2169,6 +2166,7 @@ const WebTerminal = {
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
+            this.inputBuffer = '';
             this._reconnectAttempts = 0;
             this.updateStatus('CONNECTED', 'green');
 
@@ -2193,7 +2191,8 @@ const WebTerminal = {
 
         this.ws.onclose = (event) => {
             if (event.code === 4003) {
-                this.term.writeln('\r\n\x1b[31m[ACCESS DENIED] Terminal requires pentester or admin role.\x1b[0m\r\n');
+                const reason = event.reason || 'Terminal access denied by policy.';
+                this.term.writeln(`\r\n\x1b[31m[ACCESS DENIED] ${reason}\x1b[0m\r\n`);
                 this.updateStatus('DENIED', 'red');
                 return;
             }
@@ -2214,6 +2213,70 @@ const WebTerminal = {
         this.ws.onerror = () => {
             this.updateStatus('ERROR', 'red');
         };
+    },
+
+    handleInputData(data) {
+        if (!this.term || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
+            return;
+        }
+
+        for (let i = 0; i < data.length; i++) {
+            const ch = data[i];
+
+            // Ignore escape/control sequences (arrow keys, function keys, etc.).
+            if (ch === '\u001b') {
+                if (i + 1 < data.length && data[i + 1] === '[') {
+                    i += 1;
+                    while (i + 1 < data.length) {
+                        const code = data.charCodeAt(i + 1);
+                        i += 1;
+                        if (code >= 64 && code <= 126) {
+                            break;
+                        }
+                    }
+                }
+                continue;
+            }
+
+            if (ch === '\r' || ch === '\n') {
+                this.term.write('\r\n');
+                this.ws.send(JSON.stringify({ type: 'exec', command: this.inputBuffer }));
+                this.inputBuffer = '';
+                continue;
+            }
+
+            // Ctrl+C clears current input line.
+            if (ch === '\u0003') {
+                this.term.write('^C\r\n');
+                this.inputBuffer = '';
+                this.ws.send(JSON.stringify({ type: 'exec', command: '' }));
+                continue;
+            }
+
+            if (ch === '\u007f') {
+                if (this.inputBuffer.length > 0) {
+                    this.inputBuffer = this.inputBuffer.slice(0, -1);
+                    this.term.write('\b \b');
+                }
+                continue;
+            }
+
+            if (ch === '\t') {
+                if (this.inputBuffer.length + 4 <= 256) {
+                    this.inputBuffer += '    ';
+                    this.term.write('    ');
+                }
+                continue;
+            }
+
+            const code = ch.charCodeAt(0);
+            if (code >= 32 && code <= 126) {
+                if (this.inputBuffer.length < 256) {
+                    this.inputBuffer += ch;
+                    this.term.write(ch);
+                }
+            }
+        }
     },
 
     updateStatus(text, color) {
@@ -2251,7 +2314,7 @@ function initWebTerminal() {
     const titleEl = document.getElementById('web-term-title');
     if (currentUser && titleEl) {
         const user = currentUser.username || 'pentester';
-        titleEl.textContent = `${user}@atlas ~ bash`;
+        titleEl.textContent = `${user}@atlas ~ restricted`;
     }
 
     // Session timer

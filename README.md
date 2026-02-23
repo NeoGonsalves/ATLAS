@@ -82,6 +82,21 @@ Open **http://localhost:8000** in your browser.
 *   **Login**: Default credentials (if applicable) or register a new account.
 *   **Dashboard**: Manage scans, view reports, and access the terminal.
 
+### Secure Web Terminal (Production Defaults)
+The web terminal is **disabled by default** and only runs in restricted mode.
+
+Environment variables:
+```bash
+ATLAS_ENABLE_WEB_TERMINAL=true
+ATLAS_WEB_TERMINAL_MODE=safe
+ATLAS_TERMINAL_COMMAND_TIMEOUT=10
+ATLAS_TERMINAL_OUTPUT_LIMIT_CHARS=12000
+ATLAS_TERMINAL_MAX_INPUT_CHARS=256
+```
+
+Restricted mode does **not** expose raw Bash. It allows only a fixed command set:
+`help`, `clear`, `whoami`, `date`, `pwd`, `ls`, `cat`, `atlas checks`, `atlas scans`, `atlas health`, `exit`.
+
 ### Command Line Interface (CLI)
 Automate tasks directly from your terminal:
 
